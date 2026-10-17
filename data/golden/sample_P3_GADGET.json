@@ -1,0 +1,20 @@
+{
+  "policy_id": "P3_GADGET",
+  "name": "Gadget Cover (SAMPLE)",
+  "premium_annual": 120,
+  "currency": "USD",
+  "coverages": [
+    {"id": "cov_damage", "type": "accidental_damage", "limit_per_item": 1500, "deductible": 75,
+     "deductible_scope": "per_claim", "claim_deadline_days": 30,
+     "exclusions": ["cosmetic", "wear_and_tear", "deliberate"], "source_clause": "3.1"},
+    {"id": "cov_theft", "type": "theft", "limit_per_item": 1500, "deductible": 75,
+     "deductible_scope": "per_claim", "claim_deadline_days": 30,
+     "exclusions": ["unattended"], "source_clause": "4.1"}
+  ],
+  "clauses": {
+    "3.1": "Accidental damage. We repair or replace a covered device damaged by a sudden and unexpected accident, up to USD 1,500 per device. You pay USD 75 for each claim.",
+    "4.1": "Theft. Theft is covered only if the device was locked away or attached to you at the time. Devices left unattended in a public place are not covered.",
+    "5.1": "Exclusions. We do not cover cosmetic damage, wear and tear, or damage caused by deliberate acts.",
+    "6.1": "Claim deadline. You must report damage within 30 days of the incident and provide the repair estimate or receipt."
+  }
+}
