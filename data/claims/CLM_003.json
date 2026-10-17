@@ -1,0 +1,32 @@
+{
+    "claim_id": "CLM_003",
+    "synthetic": true,
+    "profile_id": "PROFILE_002",
+    "event_type": "emergency_dental",
+    "incident_date": "2026-10-20",
+    "claim_submission_date": "2026-10-22",
+    "loss_amount": 180,
+    "currency": "USD",
+    "policies_to_check": [
+      "P1_HEALTH"
+    ],
+    "claim_context": {
+      "service_type": "Emergency dental treatment",
+      "policy_effective_date": "2026-10-01",
+      "dental_waiting_period_days": 90,
+      "dental_waiting_period_complete": false,
+      "exclusion_flags": []
+    },
+    "description": "Jamie Lee incurs USD 180 for emergency dental treatment on October 20, 2026, before completion of the 90-day dental waiting period under P1_HEALTH. The claim is submitted on October 22, 2026.",
+    "expected_result": {
+      "claim_status": "denied",
+      "P1_payout": 0,
+      "total_payout": 0,
+      "out_of_pocket": 180,
+      "reason": "The emergency dental benefit is subject to a 90-day waiting period. The incident occurs before the waiting period has been completed.",
+      "source_clauses": [
+        "P1_HEALTH:3.3"
+      ],
+      "scope_note": "Only the emergency dental benefit is ineligible under this scenario. Other P1 benefits are not automatically denied."
+    }
+  }

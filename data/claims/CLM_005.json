@@ -1,0 +1,70 @@
+
+{
+    "claim_id": "CLM_005",
+    "synthetic": true,
+    "profile_id": "PROFILE_002",
+    "claim_type": "renters_contents_damage",
+    "incident_date": "2026-10-14",
+    "submission_date": "2026-10-17",
+    "currency": "USD",
+    "loss_amount": 900,
+    "policies_to_check": [
+      "P4_RENTERS"
+    ],
+    "incident": {
+      "description": "A fire damages Jamie Lee's personal belongings inside the rented apartment.",
+      "location": "Rented apartment in the Commonwealth of Norhaven",
+      "damaged_property": [
+        {
+          "item": "Clothing and personal belongings",
+          "loss_amount": 600
+        },
+        {
+          "item": "Books and study materials",
+          "loss_amount": 300
+        }
+      ],
+      "cause_of_loss": "Fire",
+      "cause_confirmed_as_covered": true,
+      "evidence_available": [
+        "Photographs of damaged belongings",
+        "Purchase records where available",
+        "Incident documentation"
+      ]
+    },
+    "policy_context": {
+      "policy_id": "P4_RENTERS",
+      "policy_active": true,
+      "contents_limit": 5000,
+      "contents_limit_remaining": 5000,
+      "contents_deductible": 250,
+      "personal_electronics_rider": {
+        "selected": false,
+        "applies_to_this_claim": false
+      },
+      "exclusion_flags": [],
+      "other_insurance_disclosed": true
+    },
+    "expected_result": {
+      "decision": "APPROVE",
+      "payout_by_policy": {
+        "P4_RENTERS": 650
+      },
+      "total_payout": 650,
+      "out_of_pocket": 250,
+      "calculation": {
+        "eligible_loss": 900,
+        "deductible": 250,
+        "payout_before_limit_check": 650,
+        "remaining_contents_limit": 5000
+      },
+      "reason": "Assuming the fire loss is covered under P4_RENTERS and no other exclusion or condition applies, the eligible contents loss is reduced by the $250 deductible. The resulting $650 payout is within the $5,000 contents limit."
+    },
+    "notes": [
+      "This is a synthetic test case, not a real insurance claim.",
+      "The fire coverage assumption must be verified against the actual P4 policy wording.",
+      "The optional personal electronics rider is not assumed to be active.",
+      "The expected payout is provisional until the actual policy terms and project schema are checked."
+    ]
+  }
+  

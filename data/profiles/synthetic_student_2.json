@@ -1,0 +1,36 @@
+{
+    "profile_id": "PROFILE_002",
+    "synthetic": true,
+    "name": "Jamie Lee",
+    "role": "International Student",
+    "country": "Commonwealth of Norhaven",
+    "currency": "USD",
+    "emergency_fund": 1500,
+    "policies": [
+      "P1_HEALTH",
+      "P2_TRAVEL",
+      "P3_GADGET",
+      "P4_RENTERS"
+    ],
+    "plans": {
+      "activity": "Overseas internship",
+      "timeframe": "Next month"
+    },
+    "assets": [
+      {
+        "asset_id": "ASSET_JAMIE_LAPTOP",
+        "type": "Laptop",
+        "primary_use": "Education and internship",
+        "insured_under": [
+          "P3_GADGET"
+        ]
+      }
+    ],
+    "notes": [
+      "Synthetic test persona; not a real individual",
+      "All financial figures are test assumptions",
+      "The emergency fund is USD 1500",
+      "All four policy IDs are assumed active during the policy period",
+      "The laptop is listed in the P3_GADGET device schedule for testing"
+    ]
+  }

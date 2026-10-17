@@ -1,0 +1,35 @@
+{
+    "claim_id": "CLM_001",
+    "synthetic": true,
+    "profile_id": "PROFILE_001",
+    "event_type": "outpatient_medical",
+    "incident_date": "2026-10-10",
+    "claim_submission_date": "2026-10-17",
+    "loss_amount": 350,
+    "currency": "USD",
+    "policies_to_check": [
+      "P1_HEALTH"
+    ],
+    "claim_context": {
+      "outpatient_annual_deductible_remaining": 300,
+      "outpatient_benefit_cap_remaining": 2000,
+      "overall_annual_limit_remaining": 50000,
+      "exclusion_flags": [],
+      "service_type": "Outpatient consultation and treatment"
+    },
+    "description": "Alex Morgan incurred USD 350 in eligible outpatient medical expenses during the active policy period. The remaining annual deductible is USD 300. The claim is submitted seven days after the treatment date.",
+    "expected_result": {
+      "claim_status": "eligible",
+      "P1_payout": 40,
+      "total_payout": 40,
+      "out_of_pocket": 310,
+      "calculation": {
+        "eligible_expenses": 350,
+        "deductible_applied": 300,
+        "remaining_expenses": 50,
+        "coinsurance_rate_paid_by_insurer": 0.8,
+        "calculated_benefit": 40
+      },
+      "reason": "The USD 300 remaining annual deductible is applied first. The insurer then pays 80% of the remaining USD 50."
+    }
+  }

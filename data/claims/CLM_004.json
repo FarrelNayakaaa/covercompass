@@ -1,0 +1,46 @@
+{
+    "claim_id": "CLM_004",
+    "synthetic": true,
+    "profile_id": "PROFILE_002",
+    "event_type": "accidental_gadget_damage",
+    "incident_date": "2026-10-01",
+    "claim_submission_date": "2026-10-30",
+    "loss_amount": 400,
+    "currency": "USD",
+    "policies_to_check": [
+      "P3_GADGET"
+    ],
+    "claim_context": {
+      "asset_id": "ASSET_JAMIE_LAPTOP",
+      "asset_type": "Laptop",
+      "damage_type": "Accidental physical damage",
+      "device_is_registered_under_P3": true,
+      "device_limit_remaining": 1500,
+      "claim_deadline_days": 30,
+      "repair_estimate_available": true,
+      "proof_of_ownership_available": true,
+      "exclusion_flags": []
+    },
+    "description": "Jamie Lee's registered laptop suffers accidental physical damage on October 1, 2026. The documented repair estimate is USD 400. The claim is submitted on October 30, 2026, which is 29 calendar days after the incident.",
+    "expected_result": {
+      "claim_status": "eligible",
+      "P3_payout": 325,
+      "total_payout": 325,
+      "out_of_pocket": 75,
+      "calculation": {
+        "eligible_loss": 400,
+        "deductible_applied": 75,
+        "calculated_payout": 325,
+        "days_between_incident_and_submission": 29,
+        "claim_deadline_days": 30,
+        "deadline_check": "passed"
+      },
+      "reason": "The claim is submitted within the 30-day deadline, the accidental damage is assumed eligible, and the required supporting documents are available.",
+      "source_clauses": [
+        "P3_GADGET:3.1",
+        "P3_GADGET:3.2",
+        "P3_GADGET:3.3",
+        "P3_GADGET:5.1"
+      ]
+    }
+  }

@@ -1,0 +1,41 @@
+{
+    "claim_id": "CLM_002",
+    "synthetic": true,
+    "profile_id": "PROFILE_001",
+    "event_type": "accidental_gadget_damage",
+    "incident_date": "2026-10-10",
+    "claim_submission_date": "2026-10-17",
+    "loss_amount": 600,
+    "currency": "USD",
+    "policies_to_check": [
+      "P3_GADGET",
+      "P2_TRAVEL"
+    ],
+    "claim_context": {
+      "asset_id": "ASSET_ALEX_LAPTOP",
+      "asset_type": "Laptop",
+      "incident_location": "Overseas",
+      "damage_type": "Accidental physical damage",
+      "device_is_registered_under_P3": true,
+      "other_insurance_disclosed": [
+        "P2_TRAVEL"
+      ],
+      "exclusion_flags": []
+    },
+    "description": "Alex's registered laptop suffers accidental physical damage during an overseas internship-related trip. A documented repair estimate is USD 600. P3_GADGET is checked first as the specific gadget policy, and P2_TRAVEL is checked for possible overlapping baggage or electronics coverage.",
+    "expected_result": {
+      "claim_status": "partially_covered",
+      "P3_payout": 525,
+      "P2_payout": 0,
+      "total_payout": 525,
+      "out_of_pocket": 75,
+      "calculation": {
+        "eligible_loss": 600,
+        "P3_deductible": 75,
+        "P3_calculated_payout": 525,
+        "remaining_loss_after_P3": 75,
+        "P2_calculated_payout": 0
+      },
+      "reason": "P3 pays the eligible accidental damage claim after its USD 75 deductible. P2 pays nothing under the proposed explicit exclusion for physical damage to a device registered under separate gadget insurance. The combined payment cannot exceed the actual loss."
+    }
+  }
