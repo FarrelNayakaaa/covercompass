@@ -1,0 +1,53 @@
+{
+  "policy_id": "P1_HEALTH",
+  "premium_annual": 720,
+  "premium_source_clause": "1.1",
+  "currency": "USD",
+  "coverages": [
+    {
+      "id": "cov_emergency_dental",
+      "type": "emergency_dental",
+      "annual_benefit_cap": 500,
+      "waiting_period_days": 90,
+      "claim_deadline_days": 60,
+      "exclusions": [
+        "routine_cleaning",
+        "elective_cosmetic_procedures",
+        "orthodontic_treatment",
+        "planned_dental_work"
+      ],
+      "source_clause": "2.5",
+      "numeric_sources": {
+        "annual_benefit_cap": "2.5",
+        "waiting_period_days": "3.3",
+        "claim_deadline_days": "5.1"
+      }
+    }
+  ],
+  "clauses": {
+    "1.1": "The annual premium is USD 720 per insured student for a twelve-month coverage period.",
+    "2.3": "The insurer pays 80% of eligible outpatient expenses after application of the annual deductible, where applicable. The insured person is responsible for the remaining 20%.",
+    "2.4": "The maximum amount payable for outpatient benefits is USD 2,000 per policy year.",
+    "2.5": "Emergency dental treatment is covered up to USD 500 per policy year when required for sudden pain, accidental dental injury, or another urgent dental condition.",
+    "3.1": "The insured person is responsible for the first USD 300 of eligible expenses subject to the annual deductible during each policy year.",
+    "3.2": "The maximum aggregate benefit payable under this policy is USD 50,000 per insured person per policy year.",
+    "3.3": "Emergency dental benefits are subject to a waiting period of 90 calendar days beginning on the effective date. A dental event occurring before completion of the waiting period is not eligible.",
+    "3.4": "The insurer determines coverage, removes excluded charges and amounts above sub-limits, applies the remaining annual deductible, calculates the benefit percentage, and checks remaining limits.",
+    "5.1": "A claim must be submitted within 60 calendar days after the covered medical event or relevant treatment expense, whichever is later."
+  },
+  "claim_id": "CLM_003",
+  "golden_result": {
+    "claim_status": "denied",
+    "payout_by_policy": {
+      "P1_HEALTH": 0
+    },
+    "total_payout": 0,
+    "out_of_pocket": 180,
+    "reason": "The emergency dental incident occurred before completion of the 90-day waiting period.",
+    "source_clauses": [
+      "P1_HEALTH:2.5",
+      "P1_HEALTH:3.3",
+      "P1_HEALTH:5.1"
+    ]
+  }
+}

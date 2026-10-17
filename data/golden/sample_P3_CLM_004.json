@@ -1,0 +1,76 @@
+{
+  "policy_id": "P3_GADGET",
+  "premium_annual": 120,
+  "premium_source_clause": "1.1",
+  "currency": "USD",
+  "coverages": [
+    {
+      "id": "cov_accidental_damage",
+      "type": "accidental_gadget_damage",
+      "limit_per_item": 1500,
+      "deductible_per_claim": 75,
+      "coinsurance": 1.0,
+      "waiting_period_days": 0,
+      "claim_deadline_days": 30,
+      "exclusions": [
+        "unattended_device_loss",
+        "theft",
+        "mysterious_disappearance",
+        "wear_and_tear",
+        "manufacturer_defect",
+        "mechanical_or_electrical_failure_without_accident",
+        "intentional_damage",
+        "pre_existing_damage",
+        "unsupported_costs"
+      ],
+      "source_clause": "2.1",
+      "numeric_sources": {
+        "limit_per_item": "2.2",
+        "deductible_per_claim": "3.1",
+        "coinsurance": "3.1",
+        "waiting_period_days": "2.1",
+        "claim_deadline_days": "3.3"
+      }
+    }
+  ],
+  "clauses": {
+    "1.1": "The annual premium is USD 120 for the coverage described in the policy.",
+    "2.1": "The policy covers eligible repair costs for sudden and unintended physical damage to an insured device during the policy period.",
+    "2.2": "The maximum benefit payable for an insured device is USD 1,500 per device during the policy period, in aggregate across claims.",
+    "3.1": "The policyholder is responsible for a deductible of USD 75 for each approved claim. The deductible is applied to the eligible loss before calculating payment.",
+    "3.2": "The claimant must provide reasonable evidence of the incident and damage, including device identification, photographs where practical, repair estimate or diagnostic report, and proof of ownership where reasonably available.",
+    "3.3": "A claim must be submitted within 30 calendar days after the date the accidental damage occurred.",
+    "4.1": "Loss of a device while left unattended in a public, shared, or unsecured location is excluded. This exclusion concerns loss of the device and does not automatically determine coverage for separately documented physical damage.",
+    "4.2": "Theft, unexplained disappearance, or inability to locate a device without evidence of a covered accidental damage event is excluded.",
+    "4.3": "Ordinary wear and tear, gradual deterioration, manufacturer defects, and mechanical or electrical failure without a covered accidental event are excluded.",
+    "4.4": "Damage intentionally caused by the policyholder or a person acting with the policyholder's consent is excluded.",
+    "4.5": "Damage that existed before the effective date or before the device was added to the confirmed device schedule is excluded.",
+    "4.6": "Unsupported costs, costs above the remaining per-device limit, nonessential upgrades, and optional accessories not included in the approved repair are not payable.",
+    "5.1": "The claimant must submit the claim within 30 calendar days after the incident.",
+    "5.5": "The claimant must disclose any other insurance that may cover the same device or incident. The claimant may not receive total reimbursement exceeding the eligible loss."
+  },
+  "claim_id": "CLM_004",
+  "golden_result": {
+    "claim_status": "eligible",
+    "payout_by_policy": {
+      "P3_GADGET": 325
+    },
+    "total_payout": 325,
+    "out_of_pocket": 75,
+    "calculation": {
+      "eligible_loss": 400,
+      "deductible_applied": 75,
+      "calculated_payout": 325,
+      "days_between_incident_and_submission": 29,
+      "claim_deadline_days": 30,
+      "deadline_check": "passed"
+    },
+    "source_clauses": [
+      "P3_GADGET:2.1",
+      "P3_GADGET:2.2",
+      "P3_GADGET:3.1",
+      "P3_GADGET:3.3",
+      "P3_GADGET:5.1"
+    ]
+  }
+}
