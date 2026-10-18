@@ -8,6 +8,8 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from src import claims_flow as cf
+from src import guard
+from src.policy_upload import ingest_policy
 from src.audit import Audit
 from src.data_loader import load_policies
 from src.qa import answer_question
@@ -15,6 +17,7 @@ from src.tiers import Gate
 from src.tool_registry import build_tools
 
 load_dotenv()
+SANDBOX_DB = os.getenv("CC_SANDBOX_DB", "sandbox.db")
 st.set_page_config(page_title="CoverCompass", page_icon="🧭", layout="wide")
 
 VERDICT_STYLE = {
@@ -38,7 +41,7 @@ def init_state():
     ss = st.session_state
     ss.session_id = str(uuid.uuid4())[:8]
     ss.policies, ss.by_id, ss.audit = policies, {p.policy_id: p for p in policies}, audit
-    ss.gate = Gate(build_tools(policies, os.getenv("CC_SANDBOX_DB", "sandbox.db")), audit)
+    ss.gate = Gate(build_tools(policies, SANDBOX_DB), audit)
     ss.turns = []
     types = cf.known_types(policies)
     ss.f_cov = types[0] if types else ""
@@ -46,6 +49,45 @@ def init_state():
     ss.f_bill, ss.f_desc = 0.0, ""
     ss.f_accident = ss.f_emergency = False
     ss.f_excl = []
+
+
+
+# ---------------------------------------------------------------- Penjaga
+def screen(text, source):
+    """Periksa pesan pengguna, catat ke audit, dan tolak aksi terlarang lewat Gate (T2)."""
+    ss = st.session_state
+    g = guard.check_message(text)
+    for kind in g.pii:
+        ss.audit.log(ss.session_id, "guard_flag", decision="masked", summary=f"{source}: pii={kind}")
+    if g.flags:
+        ss.audit.log(ss.session_id, "guard_flag", decision="blocked", summary=f"{source}: {', '.join(g.flags)}",
+                     outcome="blocked")
+    if g.t2_tool:
+        ss.gate.execute(g.t2_tool, {}, ss.session_id)     # ditolak dan dicatat sebagai known risk
+    return g
+
+
+def handle_upload(file):
+    ss = st.session_state
+    sig = (file.name, file.size)
+    if ss.get("last_upload") == sig:
+        return
+    ss.last_upload = sig
+    policy, findings, error = ingest_policy(file.getvalue(), file.name, set(ss.by_id))
+    for where, flags in findings:
+        ss.audit.log(ss.session_id, "guard_flag", decision="quarantined",
+                     summary=f"upload {file.name}: {where}: {', '.join(flags)}", outcome="blocked")
+    if error:
+        ss.upload_msg = ("error", error)
+        return
+    ss.policies = ss.policies + [policy]
+    ss.by_id[policy.policy_id] = policy
+    ss.gate.tools = build_tools(ss.policies, SANDBOX_DB)
+    if findings:
+        ss.upload_msg = ("warning", f"Loaded {policy.name}, but I removed {len(findings)} suspicious part(s) "
+                                    "that tried to give me instructions: " + "; ".join(w for w, _ in findings) + ".")
+    else:
+        ss.upload_msg = ("success", f"Loaded {policy.name}.")
 
 
 # ---------------------------------------------------------------- Q&A
@@ -75,16 +117,24 @@ def qa_mode():
         with st.chat_message("user"):
             st.write(t["question"])
         with st.chat_message("assistant"):
-            render_answer(t)
+            if "refusal" in t:
+                st.error(t["refusal"])
+                st.caption("Request refused and logged.")
+            else:
+                render_answer(t)
     q = st.chat_input("e.g. Am I covered for a dental emergency?")
     if q:
-        with st.spinner("Checking the policy text..."):
-            try:
-                ans, steps, _ = answer_question(q, st.session_state.gate, st.session_state.by_id,
-                                                st.session_state.session_id)
-                st.session_state.turns.append({"question": q, "answer": ans.model_dump(), "steps": steps})
-            except Exception as e:
-                st.error(f"Something went wrong: {type(e).__name__}: {e}")
+        g = screen(q, "chat")
+        if g.blocked:
+            st.session_state.turns.append({"question": g.masked_text, "refusal": g.message})
+        else:
+            with st.spinner("Checking the policy text..."):
+                try:
+                    ans, steps, _ = answer_question(g.masked_text, st.session_state.gate, st.session_state.by_id,
+                                                    st.session_state.session_id)
+                    st.session_state.turns.append({"question": g.masked_text, "answer": ans.model_dump(), "steps": steps})
+                except Exception as e:
+                    st.error(f"Something went wrong: {type(e).__name__}: {e}")
         st.rerun()
 
 
@@ -95,8 +145,12 @@ def do_extract():
     if not text:
         ss.claim_msg = ("warning", "Please describe what happened first.")
         return
+    g = screen(text, "claim_text")
+    if g.blocked:
+        ss.claim_msg = ("error", g.message)
+        return
     try:
-        d = cf.extract_claim(text, ss.policies, date.today())
+        d = cf.extract_claim(g.masked_text, ss.policies, date.today())
     except Exception as e:
         ss.claim_msg = ("error", f"I couldn't read that description ({type(e).__name__}). Please fill in the form yourself.")
         return
@@ -114,8 +168,12 @@ def do_extract():
 
 def run_check():
     ss = st.session_state
+    g = screen(ss.f_desc, "claim_description")
+    if g.blocked:
+        ss.claim_msg = ("error", g.message)
+        return
     claim = {"claim_id": "C-" + uuid.uuid4().hex[:6].upper(), "coverage_type": ss.f_cov,
-             "incident_date": ss.f_date.isoformat(), "bill_amount": float(ss.f_bill), "description": ss.f_desc,
+             "incident_date": ss.f_date.isoformat(), "bill_amount": float(ss.f_bill), "description": g.masked_text,
              "context": {"accident": ss.f_accident, "emergency": ss.f_emergency,
                          "exclusion_flags": list(ss.f_excl), "claim_date": ss.f_claimdate.isoformat()}}
     order = cf.order_policies(ss.policies, ss.f_cov)
@@ -243,6 +301,12 @@ with st.sidebar:
     st.subheader("Policies loaded")
     for p in st.session_state.policies:
         st.write(f"- {p.name} (`{p.policy_id}`)")
+    up = st.file_uploader("Add a policy file (JSON)", type=["json"], key="policy_upload")
+    if up is not None:
+        handle_upload(up)
+    if "upload_msg" in st.session_state:
+        kind, text = st.session_state.upload_msg
+        getattr(st, kind)(text)
     if st.toggle("Show audit log"):
         st.dataframe(st.session_state.audit.rows(st.session_state.session_id), use_container_width=True)
 

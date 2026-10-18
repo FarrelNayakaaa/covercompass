@@ -66,5 +66,6 @@
     "8.1": "Claim deadline. You must submit a claim within 60 days of the treatment date.",
     "8.2": "Documents. Send the itemised bill, proof of payment and a doctor's note.",
     "8.3": "Other insurance. If another policy also covers the same cost, we pay only what remains after the other insurer's payment."
-  }
+  },
+  "start_date": "2026-08-15"
 }
