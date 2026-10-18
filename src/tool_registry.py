@@ -42,12 +42,12 @@ CLAIM_SCHEMAS = [
          "policy_ids": {"type": "array", "items": {"type": "string"}},
          "usage": {"type": "object"}}, "required": ["claim"]}},
     {"name": "submit_claim_sandbox",
-     "description": "Submit a claim to the SANDBOX insurer portal. Requires user confirmation in the app.",
+     "description": "Submit a claim to the SANDBOX insurer portal. The payout estimate is computed by the system, "
+                    "never taken from the caller. Requires user confirmation in the app.",
      "parameters": {"type": "object", "properties": {
-         "claim_id": {"type": "string"}, "policy_id": {"type": "string"},
-         "amount_claimed": {"type": "number"}, "estimated_payout": {"type": "number"},
-         "summary": {"type": "string"}},
-         "required": ["claim_id", "policy_id", "amount_claimed", "estimated_payout", "summary"]}},
+         "claim": _CLAIM_OBJ,
+         "policy_ids": {"type": "array", "items": {"type": "string"}},
+         "usage": {"type": "object"}}, "required": ["claim"]}},
     {"name": "get_claim_status",
      "description": "Get the status of a claim in the sandbox portal.",
      "parameters": {"type": "object", "properties": {"reference": {"type": "string"}}, "required": ["reference"]}},
@@ -67,13 +67,24 @@ def _select(policies, policy_ids):
 def build_tools(policies, sandbox_db: str = "sandbox.db") -> dict:
     """Peta nama tool -> fungsi."""
     index = ClauseIndex(policies)
+
+    def _submit(claim, policy_ids=None, usage=None):
+        """Estimasi dihitung ulang di sini dari data klaim. Angka dari model tidak pernah dipercaya."""
+        c = ClaimInput.model_validate(claim)
+        res = calc_payout(c, _select(policies, policy_ids), usage)
+        if not res.per_policy:
+            raise ValueError("No policy covers this type of claim.")
+        payer = next((p.policy_id for p in res.per_policy if p.payout > 0), res.per_policy[0].policy_id)
+        out = insurer_portal.submit_claim(c.claim_id, payer, c.bill_amount, res.total_payout,
+                                          c.description or c.coverage_type, sandbox_db)
+        return {**out, "policy_id": payer, "estimated_payout": res.total_payout}
+
     return {
         "calc_payout": lambda claim, policy_ids=None, usage=None: calc_payout(
             ClaimInput.model_validate(claim), _select(policies, policy_ids), usage).model_dump(mode="json"),
         "check_claim_eligibility": lambda claim, policy_ids=None: check_claim_eligibility(
             ClaimInput.model_validate(claim), _select(policies, policy_ids)),
-        "submit_claim_sandbox": lambda claim_id, policy_id, amount_claimed, estimated_payout, summary:
-            insurer_portal.submit_claim(claim_id, policy_id, amount_claimed, estimated_payout, summary, sandbox_db),
+        "submit_claim_sandbox": _submit,
         "get_claim_status": lambda reference: insurer_portal.get_status(reference, sandbox_db),
         "search_clauses": lambda query, policy_id=None: index.search(query, policy_id),
         "get_coverage": lambda policy_id: get_coverage(policies, policy_id),
