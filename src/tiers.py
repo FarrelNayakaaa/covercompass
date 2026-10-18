@@ -13,7 +13,7 @@ TOOL_TIERS = {
     "search_clauses": Tier.T0, "get_coverage": Tier.T0,
     "check_claim_eligibility": Tier.T0, "calc_payout": Tier.T0,
     "run_scenario": Tier.T0, "exposure_map": Tier.T0, "find_overlaps": Tier.T0,
-    "list_deadlines": Tier.T0, "build_claim_pack": Tier.T0,
+    "list_deadlines": Tier.T0, "build_claim_pack": Tier.T0, "get_claim_status": Tier.T0,
     # T1
     "submit_claim_sandbox": Tier.T1, "schedule_premium_payment": Tier.T1,
     "set_alert": Tier.T1, "apply_policy_change_sandbox": Tier.T1,

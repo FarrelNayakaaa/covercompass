@@ -29,7 +29,7 @@ def test_nonsense_query_returns_nothing():
 
 
 def test_sample_ignored_when_real_policy_exists(tmp_path):
-    (tmp_path / "sample_a.json").write_text((DATA / "sample_P3_GADGET.json").read_text())
-    real = (DATA / "sample_P1_HEALTH.json").read_text().replace("P1_HEALTH", "REAL_ONE")
-    (tmp_path / "REAL_ONE.json").write_text(real)
+    base = (DATA / "P3_GADGET.json").read_text()
+    (tmp_path / "sample_a.json").write_text(base)
+    (tmp_path / "REAL_ONE.json").write_text(base.replace("P3_GADGET", "REAL_ONE"))
     assert [p.policy_id for p in load_policies(tmp_path)] == ["REAL_ONE"]

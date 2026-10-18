@@ -1,5 +1,8 @@
 from src.tools.retrieve import ClauseIndex
 from src.tools.coverage import get_coverage, list_policies
+from src.tools.payout import calc_payout, check_claim_eligibility
+from src.sandbox import insurer_portal
+from src.schemas import ClaimInput
 
 SCHEMAS = [
     {"name": "search_clauses",
@@ -18,10 +21,60 @@ SCHEMAS = [
 ]
 
 
-def build_tools(policies) -> dict:
-    """Peta nama tool -> fungsi. Tool baru (payout, klaim, dll.) ditambahkan di sini."""
+_CLAIM_PROPS = {
+    "claim_id": {"type": "string"},
+    "coverage_type": {"type": "string", "description": "e.g. outpatient, inpatient, dental_emergency, accidental_damage, theft"},
+    "incident_date": {"type": "string", "description": "YYYY-MM-DD"},
+    "bill_amount": {"type": "number"},
+    "description": {"type": "string"},
+    "context": {"type": "object", "description": "Optional flags: accident, emergency (booleans), exclusion_flags (list), claim_date (YYYY-MM-DD)"},
+}
+_CLAIM_OBJ = {"type": "object", "properties": _CLAIM_PROPS, "required": ["claim_id", "coverage_type", "incident_date", "bill_amount"]}
+
+CLAIM_SCHEMAS = [
+    {"name": "check_claim_eligibility",
+     "description": "Check waiting period, exclusions and claim deadline for a claim against the policies.",
+     "parameters": {"type": "object", "properties": {"claim": _CLAIM_OBJ}, "required": ["claim"]}},
+    {"name": "calc_payout",
+     "description": "Estimate the payout and out-of-pocket amount for a claim. The first policy in policy_ids pays first.",
+     "parameters": {"type": "object", "properties": {
+         "claim": _CLAIM_OBJ,
+         "policy_ids": {"type": "array", "items": {"type": "string"}},
+         "usage": {"type": "object"}}, "required": ["claim"]}},
+    {"name": "submit_claim_sandbox",
+     "description": "Submit a claim to the SANDBOX insurer portal. Requires user confirmation in the app.",
+     "parameters": {"type": "object", "properties": {
+         "claim_id": {"type": "string"}, "policy_id": {"type": "string"},
+         "amount_claimed": {"type": "number"}, "estimated_payout": {"type": "number"},
+         "summary": {"type": "string"}},
+         "required": ["claim_id", "policy_id", "amount_claimed", "estimated_payout", "summary"]}},
+    {"name": "get_claim_status",
+     "description": "Get the status of a claim in the sandbox portal.",
+     "parameters": {"type": "object", "properties": {"reference": {"type": "string"}}, "required": ["reference"]}},
+]
+
+
+def _select(policies, policy_ids):
+    if not policy_ids:
+        return policies
+    by_id = {p.policy_id: p for p in policies}
+    missing = [i for i in policy_ids if i not in by_id]
+    if missing:
+        raise ValueError(f"Unknown policy_id: {missing}")
+    return [by_id[i] for i in policy_ids]
+
+
+def build_tools(policies, sandbox_db: str = "sandbox.db") -> dict:
+    """Peta nama tool -> fungsi."""
     index = ClauseIndex(policies)
     return {
+        "calc_payout": lambda claim, policy_ids=None, usage=None: calc_payout(
+            ClaimInput.model_validate(claim), _select(policies, policy_ids), usage).model_dump(mode="json"),
+        "check_claim_eligibility": lambda claim, policy_ids=None: check_claim_eligibility(
+            ClaimInput.model_validate(claim), _select(policies, policy_ids)),
+        "submit_claim_sandbox": lambda claim_id, policy_id, amount_claimed, estimated_payout, summary:
+            insurer_portal.submit_claim(claim_id, policy_id, amount_claimed, estimated_payout, summary, sandbox_db),
+        "get_claim_status": lambda reference: insurer_portal.get_status(reference, sandbox_db),
         "search_clauses": lambda query, policy_id=None: index.search(query, policy_id),
         "get_coverage": lambda policy_id: get_coverage(policies, policy_id),
         "list_policies": lambda: list_policies(policies),

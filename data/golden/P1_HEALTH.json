@@ -1,0 +1,70 @@
+{
+  "policy_id": "P1_HEALTH",
+  "name": "Norland Student Health Plan",
+  "premium_annual": 720,
+  "currency": "USD",
+  "coverages": [
+    {
+      "id": "cov_inpatient",
+      "type": "inpatient",
+      "limit_annual": 50000,
+      "sub_limit": 200,
+      "deductible": 300,
+      "deductible_scope": "annual",
+      "coinsurance": 1.0,
+      "waiting_period_days": 30,
+      "emergency_waiver": true,
+      "claim_deadline_days": 60,
+      "exclusions": [
+        "pre_existing",
+        "extreme_sports",
+        "cosmetic"
+      ],
+      "source_clause": "4.1"
+    },
+    {
+      "id": "cov_outpatient",
+      "type": "outpatient",
+      "limit_annual": 2000,
+      "deductible": 300,
+      "deductible_scope": "annual",
+      "coinsurance": 0.8,
+      "claim_deadline_days": 60,
+      "exclusions": [
+        "pre_existing",
+        "extreme_sports",
+        "cosmetic"
+      ],
+      "source_clause": "4.2"
+    },
+    {
+      "id": "cov_dental",
+      "type": "dental_emergency",
+      "limit_annual": 500,
+      "waiting_period_days": 90,
+      "emergency_waiver": true,
+      "claim_deadline_days": 60,
+      "source_clause": "6.1"
+    }
+  ],
+  "clauses": {
+    "1.1": "Who is covered. This plan covers the enrolled international student named in the policy schedule while studying in Norland. It does not cover family members.",
+    "1.2": "Cover start date. Cover starts on the date shown in your policy schedule (the cover start date). Costs from before that date are not covered.",
+    "2.1": "Annual limit. The maximum we pay in any policy year is USD 50,000 for all covered benefits combined.",
+    "2.2": "Policy year. A policy year runs for 12 months from the cover start date. Limits and deductibles reset at the start of each policy year.",
+    "3.1": "Deductible. You pay the first USD 300 of covered outpatient and inpatient costs in each policy year before we pay.",
+    "3.2": "Co-insurance. Where this plan says we pay a percentage, you pay the rest.",
+    "4.1": "Inpatient care. After the deductible we pay 100% of covered inpatient costs. Room and board is limited to USD 200 per night.",
+    "4.2": "Outpatient care. After the deductible we pay 80% of covered outpatient costs, up to USD 2,000 per policy year.",
+    "4.3": "Emergency room. Emergency room visits are covered as outpatient care unless they lead to admission, in which case they are covered as inpatient care.",
+    "5.1": "Non-emergency admission. Planned inpatient admissions in the first 30 days after the cover start date are not covered. This waiting period does not apply to emergencies.",
+    "6.1": "Dental. Only emergency dental treatment after an accident or acute pain is covered, up to USD 500 per policy year. Routine cleaning, fillings and orthodontics are not covered.",
+    "6.2": "Waiting period for dental. Dental benefits begin 90 days after your cover start date. This waiting period does not apply to dental treatment needed because of an accident.",
+    "7.1": "General exclusions. We do not pay for conditions that existed before your cover start date, for injuries from extreme sports, or for cosmetic treatment.",
+    "7.2": "Extreme sports. Extreme sports include motor racing, skydiving and free climbing.",
+    "7.3": "Treatment abroad. Treatment received outside Norland is not covered by this plan. Please check your travel policy.",
+    "8.1": "Claim deadline. You must submit a claim within 60 days of the treatment date.",
+    "8.2": "Documents. Send the itemised bill, proof of payment and a doctor's note.",
+    "8.3": "Other insurance. If another policy also covers the same cost, we pay only what remains after the other insurer's payment."
+  }
+}
