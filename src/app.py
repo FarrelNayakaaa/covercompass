@@ -8,6 +8,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from src import claims_flow as cf
+from src.clock import today
 from src import guard
 from src.scenarios import DEFAULT_SCENARIOS
 from src.policy_upload import ingest_policy
@@ -46,7 +47,7 @@ def init_state():
     ss.turns = []
     types = cf.known_types(policies)
     ss.f_cov = types[0] if types else ""
-    ss.f_date, ss.f_claimdate = date.today(), date.today()
+    ss.f_date, ss.f_claimdate = today(), today()
     ss.f_bill, ss.f_desc = 0.0, ""
     ss.f_accident = ss.f_emergency = False
     ss.f_excl = []
@@ -151,7 +152,7 @@ def do_extract():
         ss.claim_msg = ("error", g.message)
         return
     try:
-        d = cf.extract_claim(g.masked_text, ss.policies, date.today())
+        d = cf.extract_claim(g.masked_text, ss.policies, today())
     except Exception as e:
         ss.claim_msg = ("error", f"I couldn't read that description ({type(e).__name__}). Please fill in the form yourself.")
         return
@@ -184,7 +185,9 @@ def run_check():
     if elig["status"] != "ok" or pay["status"] != "ok":
         ss.claim_msg = ("error", "I couldn't calculate this claim. " + str(pay.get("reason") or elig.get("reason") or ""))
         return
-    ss.claim_result = {"claim": claim, "order": order, "elig": elig["result"], "pay": pay["result"]}
+    dl = ss.gate.execute("list_deadlines", {"claim": claim, "policy_ids": order}, ss.session_id)
+    ss.claim_result = {"claim": claim, "order": order, "elig": elig["result"], "pay": pay["result"],
+                       "deadlines": dl.get("result", [])}
     ss.pop("claim_ref", None); ss.pop("claim_status", None)
 
 
@@ -214,7 +217,7 @@ def claim_mode():
     types = cf.known_types(ss.policies)
     with st.form("claim_form"):
         st.selectbox("What kind of claim is it?", types, key="f_cov", format_func=cf.label)
-        st.date_input("Date of the incident", key="f_date", max_value=date.today())
+        st.date_input("Date of the incident", key="f_date", max_value=today())
         st.number_input("Total bill (USD)", min_value=0.0, step=10.0, key="f_bill")
         st.date_input("Date you are filing the claim", key="f_claimdate")
         st.checkbox("It was an accident", key="f_accident")
@@ -243,6 +246,13 @@ def claim_mode():
         with st.expander(f"How {ss.by_id[p['policy_id']].name} was calculated (pays ${p['payout']:,.2f})"):
             st.table([{"Step": STEP_NAMES.get(s["step"], s["step"]), "Amount": "" if s["amount"] is None else f"{s['amount']:,.2f}",
                        "Note": s["note"], "Clause": s["clause"]} for s in p["steps"]])
+
+    for d in r.get("deadlines", []):
+        txt = f"**{d['name']}**: file this claim by **{d['deadline']}** ({d['days_left']} days left, clause {d['clause']})."
+        if d["days_left"] < 0:
+            st.error(f"**{d['name']}**: the filing deadline was {d['deadline']} and has passed.")
+        else:
+            (st.warning if d["severity"] != "info" else st.info)(txt)
 
     st.subheader("Documents")
     available = [d for i, d in enumerate(cf.required_docs(claim["coverage_type"]))
@@ -278,6 +288,9 @@ def run_money():
                  probability=float(ss.get(f"m_prob_{s['id']}", s["probability"]))) for s in DEFAULT_SCENARIOS]
     out = ss.gate.execute("exposure_map", {"emergency_fund": float(ss.get("m_fund", 1500.0)), "scenarios": scen},
                           ss.session_id)
+    ov = ss.gate.execute("find_overlaps", {}, ss.session_id)
+    al = ss.gate.execute("list_alerts", {}, ss.session_id)
+    ss.overlaps, ss.alerts = ov.get("result"), al.get("result", [])
     if out["status"] == "ok":
         ss.money_result = out["result"]
     else:
@@ -318,6 +331,29 @@ def money_mode():
                "Why": x["note"] or ", ".join(x["paid_by"])} for x in r["rows"]])
     st.bar_chart({x["label"]: x["you_pay"] for x in r["rows"]}, y_label="You pay (USD)")
     st.caption(r["note"])
+
+    ov = ss.get("overlaps")
+    if ov and ov["overlaps"]:
+        st.subheader("Where your money may be leaking")
+        if ov["possible_duplicate_premium"] > 0:
+            st.warning(f"You may be paying about ${ov['possible_duplicate_premium']:,.0f} a year for cover that adds "
+                       "nothing in a typical loss, because another policy already pays first.")
+        for o in ov["overlaps"]:
+            with st.expander(f"{o['label']}: {len(o['policies'])} policies cover this"):
+                st.write(o["summary"])
+                st.table([{"Policy": i["name"], "Pays first": "yes" if i["pays_first"] else "",
+                           "You pay first": f"${i['deductible']:,.0f}",
+                           f"Pays in a ${o['typical_bill']:,.0f} loss": f"${i['typical_payout']:,.2f}",
+                           "Adds money above": "" if i["adds_money_above"] is None else f"${i['adds_money_above']:,.0f}",
+                           "Separate premium": "" if not i["premium_portion"] else f"${i['premium_portion']:,.0f}/year"}
+                          for i in o["policies"]])
+        st.caption(ov["note"])
+    alerts = ss.get("alerts") or []
+    if alerts:
+        st.subheader("Coming up")
+        for a in alerts:
+            msg = f"**{a['title']}** ({a['days_left']} days). {a['detail']}"
+            (st.error if a["severity"] == "urgent" else st.warning if a["severity"] == "soon" else st.info)(msg)
 
 
 # ---------------------------------------------------------------- Konfirmasi T1

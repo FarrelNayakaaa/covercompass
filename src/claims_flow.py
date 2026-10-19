@@ -9,7 +9,9 @@ LABELS = {
     "accidental_damage": "Accidental damage to a device", "theft": "Theft", "medical_abroad": "Medical care abroad",
     "liability": "Liability", "trip_cancellation": "Trip cancellation",
     "pre_existing": "Pre-existing condition", "extreme_sports": "Extreme sports", "cosmetic": "Cosmetic treatment",
-    "wear_and_tear": "Wear and tear", "deliberate": "Deliberate act", "unattended": "Device left unattended",
+    "wear_and_tear": "Wear and tear", "deliberate": "Deliberate act", "unattended": "Device left unattended", "left_unattended": "Item left unattended",
+    "unlicensed_motorcycle": "Riding a motorcycle without a licence", "no_forced_entry": "No sign of forced entry",
+    "outside_residence": "Happened outside the home",
 }
 
 

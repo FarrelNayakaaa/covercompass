@@ -35,6 +35,8 @@ def check_eligibility(claim: ClaimInput, policy: Policy, cov: Coverage) -> tuple
             if not waived:
                 return False, (f"Waiting period of {cov.waiting_period_days} days is not over "
                                f"({days} days since cover start).")
+    if policy.end_date and claim.incident_date > policy.end_date:
+        return False, "The incident happened after the cover ended."
     if cov.claim_deadline_days is not None:
         claim_date = _to_date(ctx.get("claim_date")) or claim.incident_date
         late = (claim_date - claim.incident_date).days

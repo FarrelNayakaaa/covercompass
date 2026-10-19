@@ -43,5 +43,7 @@
     "6.1": "Claim deadline. You must report damage within 30 days of the incident and provide the repair estimate or receipt.",
     "6.2": "Documents. For theft you must also provide a police report number.",
     "7.1": "Other insurance. If another policy covers the same loss, we pay only our share after the other insurer's payment, and the total paid by all insurers cannot exceed the loss."
-  }
+  },
+  "start_date": "2025-12-01",
+  "end_date": "2026-12-01"
 }

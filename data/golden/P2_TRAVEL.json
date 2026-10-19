@@ -1,0 +1,55 @@
+{
+  "policy_id": "P2_TRAVEL",
+  "name": "Student Travel Cover",
+  "premium_annual": 180,
+  "currency": "USD",
+  "start_date": "2026-09-01",
+  "end_date": "2027-08-31",
+  "coverages": [
+    {
+      "id": "cov_medical_abroad",
+      "type": "medical_abroad",
+      "limit_annual": 100000,
+      "deductible": 100,
+      "deductible_scope": "per_claim",
+      "claim_deadline_days": 30,
+      "exclusions": [
+        "unlicensed_motorcycle",
+        "extreme_sports",
+        "pre_existing"
+      ],
+      "source_clause": "2.1"
+    },
+    {
+      "id": "cov_baggage_damage",
+      "type": "accidental_damage",
+      "limit_per_item": 500,
+      "deductible": 100,
+      "deductible_scope": "per_claim",
+      "claim_deadline_days": 30,
+      "exclusions": [
+        "left_unattended"
+      ],
+      "source_clause": "3.1"
+    },
+    {
+      "id": "cov_trip_cancel",
+      "type": "trip_cancellation",
+      "limit_annual": 1000,
+      "deductible": 0,
+      "claim_deadline_days": 30,
+      "source_clause": "4.1"
+    }
+  ],
+  "clauses": {
+    "1.1": "Who is covered. This policy covers the named student during trips outside the country of study, up to 90 days for each trip.",
+    "2.1": "Medical expenses abroad. We pay emergency medical and hospital costs incurred outside your country of study, up to USD 100,000 for the policy year. You pay the first USD 100 of each claim.",
+    "3.1": "Baggage and personal electronics. We pay for accidental damage to your baggage and personal electronics during a trip, up to USD 500 per item. You pay the first USD 100 of each claim.",
+    "3.2": "Electronics in a checked bag are covered only if the bag was in the care of the airline, hotel or other transport provider at the time. Items left unattended are not covered.",
+    "4.1": "Trip cancellation. We refund prepaid, non-refundable travel costs up to USD 1,000 if you must cancel for a covered reason, such as serious illness before departure.",
+    "6.1": "General exclusions. We do not pay for claims that arise from riding a motorcycle without a valid licence, from extreme sports, or from travel against official government advice.",
+    "6.2": "Pre-existing conditions. Medical costs linked to a condition that existed before the trip started are not covered.",
+    "7.1": "Claim deadline. You must report a claim within 30 days of the incident.",
+    "8.1": "Other insurance. If another policy covers the same loss, we pay only the part of the loss that the other policy does not pay."
+  }
+}

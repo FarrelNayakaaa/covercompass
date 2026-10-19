@@ -74,7 +74,23 @@ def test_money_mode_shows_total_cost_of_risk(app):
     assert not at.exception
     labels = [m.label for m in at.metric]
     assert labels[:3] == ["Premiums per year", "Expected out-of-pocket per year", "Total cost of risk"]
-    assert at.metric[0].value == "$840.00"
+    assert at.metric[0].value == "$1,116.00"
     at.number_input(key="m_fund").set_value(500.0)
     [b for b in at.button if b.label == "Recalculate"][0].click().run()
     assert any("more than your emergency savings" in e.value for e in at.error)
+
+
+def test_money_mode_shows_overlap_and_alerts(app):
+    at = app.sidebar.radio(key="mode").set_value("See my money risk").run()
+    assert any("may be paying about $60" in w.value for w in at.warning)
+    assert any("waiting period ends on 2026-11-13" in w.value for w in at.warning)
+    assert any("Gadget Cover" in w.value and "ends soon" in w.value for w in at.warning)
+
+
+def test_claim_result_shows_filing_deadline(app):
+    at = app
+    at.number_input(key="f_bill").set_value(600.0).run()
+    at.selectbox(key="f_cov").set_value("accidental_damage").run()
+    at.button[[b.label for b in at.button].index("Check my claim")].click().run()
+    assert not at.exception
+    assert any("file this claim by" in (w.value) for w in list(at.info) + list(at.warning))

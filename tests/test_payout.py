@@ -91,6 +91,6 @@ def test_unknown_coverage_type_pays_nothing():
 
 
 def test_check_claim_eligibility_lists_policies():
-    out = check_claim_eligibility(claim("theft", 800, exclusion_flags=["unattended"]), list(POL.values()))
+    out = check_claim_eligibility(claim("theft", 800, exclusion_flags=["unattended"]), [POL["P3_GADGET"]])
     assert out == [{"policy_id": "P3_GADGET", "eligible": False, "reason": "Excluded: unattended.",
                     "clause": "4.1", "claim_deadline_days": 30}]

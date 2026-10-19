@@ -1,4 +1,6 @@
 from src.scenarios import run_scenarios
+from src.tools.alerts import list_alerts, list_deadlines
+from src.tools.overlap import find_overlaps
 from src.tools.retrieve import ClauseIndex
 from src.tools.coverage import get_coverage, list_policies
 from src.tools.payout import calc_payout, check_claim_eligibility
@@ -98,6 +100,9 @@ def build_tools(policies, sandbox_db: str = "sandbox.db") -> dict:
         "check_claim_eligibility": lambda claim, policy_ids=None: check_claim_eligibility(
             ClaimInput.model_validate(claim), _select(policies, policy_ids)),
         "submit_claim_sandbox": _submit,
+        "find_overlaps": lambda: find_overlaps(policies),
+        "list_alerts": lambda: list_alerts(policies),
+        "list_deadlines": lambda claim, policy_ids=None: list_deadlines(claim, _select(policies, policy_ids)),
         "exposure_map": lambda emergency_fund=1500.0, scenarios=None: run_scenarios(policies, scenarios, emergency_fund),
         "get_claim_status": lambda reference: insurer_portal.get_status(reference, sandbox_db),
         "search_clauses": lambda query, policy_id=None: index.search(query, policy_id),

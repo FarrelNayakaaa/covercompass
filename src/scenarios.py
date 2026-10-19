@@ -3,6 +3,8 @@ dan menghitung Total Cost of Risk (TCR) = premi tahunan + expected out-of-pocket
 Probabilitas di sini adalah ASUMSI untuk simulasi, bukan statistik atau hitungan aktuaria."""
 from datetime import date
 
+from src.clock import today
+
 from src.claims_flow import order_policies
 from src.schemas import ClaimInput
 from src.tools.payout import calc_payout
@@ -16,6 +18,8 @@ DEFAULT_SCENARIOS = [
      "probability": 0.02, "context": {}},
     {"id": "dental", "label": "Emergency dental after an accident", "coverage_type": "dental_emergency",
      "bill": 600.0, "probability": 0.05, "context": {"accident": True}},
+    {"id": "abroad", "label": "Medical care during a trip abroad", "coverage_type": "medical_abroad",
+     "bill": 3000.0, "probability": 0.03, "context": {}},
     {"id": "damage", "label": "Laptop damaged by accident", "coverage_type": "accidental_damage",
      "bill": 600.0, "probability": 0.10, "context": {}},
     {"id": "theft", "label": "Phone stolen (locked away or on you)", "coverage_type": "theft",
@@ -23,17 +27,17 @@ DEFAULT_SCENARIOS = [
 ]
 
 
-def run_scenarios(policies, scenarios=None, emergency_fund: float = 1500.0, today: date | None = None) -> dict:
-    today = today or date.today()
+def run_scenarios(policies, scenarios=None, emergency_fund: float = 1500.0, on: date | None = None) -> dict:
+    on = on or today()
     by_id = {p.policy_id: p for p in policies}
     rows = []
     for s in (scenarios or DEFAULT_SCENARIOS):
         order = order_policies(policies, s["coverage_type"])
         bill = float(s["bill"])
         if order:
-            ctx = dict(s.get("context") or {}, claim_date=today.isoformat())
+            ctx = dict(s.get("context") or {}, claim_date=on.isoformat())
             claim = ClaimInput(claim_id=f"SIM-{s['id']}", coverage_type=s["coverage_type"],
-                               incident_date=today, bill_amount=bill, context=ctx)
+                               incident_date=on, bill_amount=bill, context=ctx)
             res = calc_payout(claim, [by_id[i] for i in order])
             payout, oop = res.total_payout, res.out_of_pocket
             payers = [by_id[p.policy_id].name for p in res.per_policy if p.payout > 0]

@@ -1,0 +1,53 @@
+{
+  "policy_id": "P4_RENTERS",
+  "name": "Renters Cover",
+  "premium_annual": 96,
+  "currency": "USD",
+  "start_date": "2026-09-01",
+  "end_date": "2027-08-31",
+  "coverages": [
+    {
+      "id": "cov_contents_theft",
+      "type": "theft",
+      "limit_annual": 5000,
+      "deductible": 250,
+      "deductible_scope": "per_claim",
+      "claim_deadline_days": 45,
+      "exclusions": [
+        "no_forced_entry",
+        "outside_residence"
+      ],
+      "source_clause": "1.1"
+    },
+    {
+      "id": "cov_liability",
+      "type": "liability",
+      "limit_annual": 20000,
+      "deductible": 0,
+      "claim_deadline_days": 45,
+      "source_clause": "2.1"
+    },
+    {
+      "id": "cov_electronics_rider",
+      "type": "accidental_damage",
+      "limit_per_item": 800,
+      "deductible": 250,
+      "deductible_scope": "per_claim",
+      "claim_deadline_days": 45,
+      "exclusions": [
+        "deliberate",
+        "wear_and_tear"
+      ],
+      "premium_portion": 60,
+      "source_clause": "3.1"
+    }
+  ],
+  "clauses": {
+    "1.1": "Contents. We cover your belongings inside your rented home against fire, water damage and theft after forced entry, up to USD 5,000 in total for the policy year. You pay the first USD 250 of each claim.",
+    "2.1": "Liability. We pay up to USD 20,000 if you are legally responsible for accidental damage to the landlord's property.",
+    "3.1": "Personal electronics rider. Laptops, phones and tablets are covered for accidental damage anywhere in the world, up to USD 800 per item. You pay the first USD 250 of each claim. The rider costs USD 60 of your yearly premium.",
+    "3.2": "Electronics stolen outside your home are not covered by this policy.",
+    "5.1": "Exclusions. We do not pay for loss caused by deliberate acts, for wear and tear, or for theft without signs of forced entry.",
+    "6.1": "Claim deadline. You must report a claim within 45 days of the incident."
+  }
+}

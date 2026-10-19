@@ -17,6 +17,7 @@ class Coverage(BaseModel):
     emergency_waiver: bool = False              # True = masa tunggu tidak berlaku untuk kasus darurat
     claim_deadline_days: int | None = None
     exclusions: list[str] = Field(default_factory=list)
+    premium_portion: float | None = None        # bagian premi untuk cakupan ini, bila terpisah (mis. rider)
     source_clause: str                          # wajib, dipakai Auditor
 
 
@@ -26,6 +27,7 @@ class Policy(BaseModel):
     premium_annual: float
     currency: str = "USD"
     start_date: date | None = None
+    end_date: date | None = None
     coverages: list[Coverage]
     clauses: dict[str, str]                     # clause_id -> teks klausul
 
