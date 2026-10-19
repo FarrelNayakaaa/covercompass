@@ -1,3 +1,4 @@
+from src.scenarios import run_scenarios
 from src.tools.retrieve import ClauseIndex
 from src.tools.coverage import get_coverage, list_policies
 from src.tools.payout import calc_payout, check_claim_eligibility
@@ -54,6 +55,18 @@ CLAIM_SCHEMAS = [
 ]
 
 
+EXPOSURE_SCHEMA = {"name": "exposure_map",
+    "description": "Run common what-if scenarios (doctor visit, hospital stay, broken laptop...) through all policies. "
+                   "Returns how much the insurer pays, how much the user pays, expected yearly out-of-pocket cost "
+                   "and total cost of risk (premiums + expected out-of-pocket). Probabilities are assumptions.",
+    "parameters": {"type": "object", "properties": {
+        "emergency_fund": {"type": "number", "description": "Savings the user could use in an emergency"},
+        "scenarios": {"type": "array", "items": {"type": "object"}}}, "required": []}}
+
+
+CLAIM_SCHEMAS.append(EXPOSURE_SCHEMA)
+
+
 def _select(policies, policy_ids):
     if not policy_ids:
         return policies
@@ -85,6 +98,7 @@ def build_tools(policies, sandbox_db: str = "sandbox.db") -> dict:
         "check_claim_eligibility": lambda claim, policy_ids=None: check_claim_eligibility(
             ClaimInput.model_validate(claim), _select(policies, policy_ids)),
         "submit_claim_sandbox": _submit,
+        "exposure_map": lambda emergency_fund=1500.0, scenarios=None: run_scenarios(policies, scenarios, emergency_fund),
         "get_claim_status": lambda reference: insurer_portal.get_status(reference, sandbox_db),
         "search_clauses": lambda query, policy_id=None: index.search(query, policy_id),
         "get_coverage": lambda policy_id: get_coverage(policies, policy_id),

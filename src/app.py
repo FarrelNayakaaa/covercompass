@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from src import claims_flow as cf
 from src import guard
+from src.scenarios import DEFAULT_SCENARIOS
 from src.policy_upload import ingest_policy
 from src.audit import Audit
 from src.data_loader import load_policies
@@ -269,6 +270,56 @@ def claim_mode():
                     (f", approved amount ${s['approved_amount']:,.2f}" if s.get("status") == "approved" else ""))
 
 
+
+# ---------------------------------------------------------------- Uang
+def run_money():
+    ss = st.session_state
+    scen = [dict(s, bill=float(ss.get(f"m_bill_{s['id']}", s["bill"])),
+                 probability=float(ss.get(f"m_prob_{s['id']}", s["probability"]))) for s in DEFAULT_SCENARIOS]
+    out = ss.gate.execute("exposure_map", {"emergency_fund": float(ss.get("m_fund", 1500.0)), "scenarios": scen},
+                          ss.session_id)
+    if out["status"] == "ok":
+        ss.money_result = out["result"]
+    else:
+        ss.claim_msg = ("error", "I couldn't run the scenarios: " + str(out.get("reason", "")))
+
+
+def money_mode():
+    ss = st.session_state
+    st.caption("How much of your money is really protected? I run common what-if events through all your policies. "
+               "Numbers come from the payout calculator, not from the AI. Probabilities are assumptions, not statistics.")
+    if "money_result" not in ss:
+        run_money()
+    with st.expander("Change the assumptions"):
+        with st.form("money_form"):
+            st.number_input("Emergency savings you could use (USD)", min_value=0.0, step=100.0, value=1500.0, key="m_fund")
+            for s in DEFAULT_SCENARIOS:
+                c1, c2 = st.columns(2)
+                c1.number_input(f"{s['label']}: cost (USD)", min_value=0.0, step=50.0, value=s["bill"], key=f"m_bill_{s['id']}")
+                c2.number_input(f"{s['label']}: chance per year", min_value=0.0, max_value=1.0, step=0.01,
+                                value=s["probability"], key=f"m_prob_{s['id']}")
+            st.form_submit_button("Recalculate", on_click=run_money)
+    r = ss.get("money_result")
+    if not r:
+        return
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Premiums per year", f"${r['premiums']:,.2f}")
+    c2.metric("Expected out-of-pocket per year", f"${r['expected_out_of_pocket']:,.2f}")
+    c3.metric("Total cost of risk", f"${r['total_cost_of_risk']:,.2f}")
+    w = r["worst_case"]
+    if w and r["shortfall"] > 0:
+        st.error(f"If this happens: **{w['label']}**, you would pay ${w['you_pay']:,.2f} yourself. "
+                 f"That is ${r['shortfall']:,.2f} more than your emergency savings (${r['emergency_fund']:,.2f}).")
+    elif w:
+        st.success(f"The worst case here is **{w['label']}**: you would pay ${w['you_pay']:,.2f} yourself, "
+                   f"which your emergency savings (${r['emergency_fund']:,.2f}) can cover.")
+    st.table([{"What happens": x["label"], "Cost": f"${x['bill']:,.2f}", "Insurance pays": f"${x['insurer_pays']:,.2f}",
+               "You pay": f"${x['you_pay']:,.2f}", "Chance per year": f"{x['probability']:.0%}",
+               "Why": x["note"] or ", ".join(x["paid_by"])} for x in r["rows"]])
+    st.bar_chart({x["label"]: x["you_pay"] for x in r["rows"]}, y_label="You pay (USD)")
+    st.caption(r["note"])
+
+
 # ---------------------------------------------------------------- Konfirmasi T1
 def render_pending():
     ss, gate = st.session_state, st.session_state.gate
@@ -297,7 +348,7 @@ def render_pending():
 init_state()
 st.title("CoverCompass")
 with st.sidebar:
-    mode = st.radio("What would you like to do?", ["Ask about my policies", "File a claim"], key="mode")
+    mode = st.radio("What would you like to do?", ["Ask about my policies", "File a claim", "See my money risk"], key="mode")
     st.subheader("Policies loaded")
     for p in st.session_state.policies:
         st.write(f"- {p.name} (`{p.policy_id}`)")
@@ -322,5 +373,7 @@ if "last_result" in st.session_state:
 
 if mode == "Ask about my policies":
     qa_mode()
-else:
+elif mode == "File a claim":
     claim_mode()
+else:
+    money_mode()

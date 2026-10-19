@@ -67,3 +67,14 @@ def test_qa_mode_still_loads(app):
     at = app.sidebar.radio(key="mode").set_value("Ask about my policies").run()
     assert not at.exception
     assert len(at.chat_input) == 1
+
+
+def test_money_mode_shows_total_cost_of_risk(app):
+    at = app.sidebar.radio(key="mode").set_value("See my money risk").run()
+    assert not at.exception
+    labels = [m.label for m in at.metric]
+    assert labels[:3] == ["Premiums per year", "Expected out-of-pocket per year", "Total cost of risk"]
+    assert at.metric[0].value == "$840.00"
+    at.number_input(key="m_fund").set_value(500.0)
+    [b for b in at.button if b.label == "Recalculate"][0].click().run()
+    assert any("more than your emergency savings" in e.value for e in at.error)
